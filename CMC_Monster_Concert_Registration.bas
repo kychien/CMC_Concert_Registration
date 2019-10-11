@@ -8,6 +8,37 @@ Sub arrange_sheets()
     ' Go to first sheet in case of multiple runs
     Worksheets(1).Activate
     
+    ' Variables for scraping data
+    Dim priority() As String
+    Dim teachers() As String
+    Dim addrs() As String
+    Dim addr As String
+    Dim pNums() As String
+    Dim emails() As String
+    Dim tYears() As Integer
+    Dim playTs() As String
+    Dim playPs() As String
+    Dim playable As String
+    Dim repStudents() As Integer
+    Dim stuFees() As Integer
+    Dim memStatus() As String
+    Dim memFeeStat() As String
+    Dim totFees() As Integer
+    Dim actStudents() As Integer
+    Dim students() As String
+    Dim stuYears() As Integer
+    Dim stuStats() As String
+    Dim pair As String
+    Dim pAssigns() As String
+    Dim waitList() As String
+    Dim pairCts() As Integer
+    Dim notes() As String
+    Dim y, x, cur, aCt, sI, px, pn, t As Integer
+    Dim cTeach, cEmail, cPhone As String
+    Dim dupes() As Boolean
+    Dim valid As Boolean
+    Dim songs() As String
+    
     ' Determine row count for variable sizing
     Dim rCt As Long
     rCt = Cells(Rows.Count, 1).End(xlUp).row
@@ -18,34 +49,44 @@ Sub arrange_sheets()
     sCt = 15                                    ' Initial implementation assuming fixed # 15
     tCt = 2                                     ' Initial implementation assuming fixed # 2
     
-    ' Variables for scraping data
-    Dim teachers(rCt) As String
-    Dim addrs(rCt) As String
-    Dim addr As String
-    Dim pNums(rCt) As String
-    Dim emails(rCt) As String
-    Dim tYears(rCt) As Integer
-    Dim playTs(rCt) As String
-    Dim playPs(rCt) As String
-    Dim playable As String
-    Dim repStudents(rCt) As Integer
-    Dim stuFees(rCt) As Integer
-    Dim memStatus(rCt) As String
-    Dim memFeeStat(rCt) As String
-    Dim totFees(rCt) As Integer
-    Dim actStudents(rCt) As Integer
-    Dim students(rCt * 30) As String
-    Dim stuYears(rCt * 30) As Integer
-    Dim stuStats(rCt * 30) As String
-    Dim pair As String
-    Dim pAssigns(sCt * tCt, pCt) As String
-    Dim waitList(sCt * tCt, pCt) As String
-    Dim pairCts(sCt * tCt) As Integer
-    Dim notes(rCt) As String
-    Dim y, x, cur, aCt, sI, px, pn, t As Integer
-    Dim cTeach, cEmail, cPhone As String
-    Dim dupes(rCt) As Boolean
-    Dim valid As Boolean
+    ' Variables for Registration fee calculations
+    Dim monER, dayER, mFee, sFee, lFee, maxS As Integer
+    monER = 10                                  ' Month of end of early registration
+    dayER = 25                                  ' Last DAY of early registration period
+    mFee = 50                                   ' Membership Fee
+    sFee = 60                                   ' Early registration fee
+    lFee = 70                                   ' Late registration fee
+    maxS = 30                                   ' Maximum number of students allowed in form
+    
+    ReDim priority(rCt)
+    ReDim priority(rCt)
+    ReDim teachers(rCt)
+    ReDim addrs(rCt)
+    ReDim pNums(rCt)
+    ReDim emails(rCt)
+    ReDim tYears(rCt)
+    ReDim playTs(rCt)
+    ReDim playPs(rCt)
+    ReDim repStudents(rCt)
+    ReDim stuFees(rCt)
+    ReDim memStatus(rCt)
+    ReDim memFeeStat(rCt)
+    ReDim totFees(rCt)
+    ReDim actStudents(rCt)
+    ReDim students(rCt * maxS)
+    ReDim stuYears(rCt * maxS)
+    ReDim stuStats(rCt * maxS)
+    ReDim pAssigns(sCt * tCt, pCt)
+    ReDim waitList(sCt * tCt, pCt)
+    ReDim pairCts(sCt * tCt)
+    ReDim notes(rCt)
+    ReDim dupes(rCt)
+    ReDim songs(sCt)
+    
+    ' Get the song names
+    For i = 1 To sCt
+        songs(i) = Split((Split(Cells(1, (11 + i)), "[")(1)), "]")(0)
+    Next i
     
     For i = 1 To (sCt * tCt)
         pairCts(i) = 0
@@ -61,12 +102,13 @@ Sub arrange_sheets()
     
     '   Get the name, email and phone number
         cTeach = UCase(Cells(y, 3))
+        priority(cur) = Cells(y, 1)
         emails(cur) = Cells(y, 2)
         pNums(cur) = Cells(y, 8)
         tYears(cur) = Cells(y, 9)
         
     '   Check for duplicate entry
-        If (IsInArr(cTeach, teachers) = True) Then
+        If (IsInArr(CStr(cTeach), teachers) = True) Then
             ' Flag previous duplicates
             For i = 1 To curr
                 If (teachers(i) = cTeach) Then
@@ -89,7 +131,7 @@ Sub arrange_sheets()
             pad = " 0"
         End If
         
-        addr = addr + pad + Cells(y, 7)
+        addr = addr + pad + CStr(Cells(y, 7))
         
         addrs(cur) = addr
         
@@ -145,6 +187,7 @@ Sub arrange_sheets()
         actStudents(cur) = aCt
     
     '   Parse the special notes?
+        notes(cur) = Cells(y, 319)  ' No special treatment on initial implementation
         
         y = y + 1
         cur = cur + 1
@@ -172,13 +215,14 @@ Sub arrange_sheets()
                         pair = pair + Cells(i, px + 1)
                     End If
                     If (valid) Then
-    '    Add to queue if there is space
+    '    Identify appropriate queue based on time!!!
                         If (Left(Cells(i, px + 2), 1) = "4") Then
-                            t = (pn * 2) + 2
+                            t = pn + sCt
                         Else
-                            t = (pn * 2) + 1
+                            t = pn
                         End If
-                        If (pairCts(t) < 17) Then
+    '    Add to queue if there is space
+                        If (pairCts(t) < pCt) Then
                             pairCts(t) = pairCts(t) + 1
                             pAssigns(t, pairCts(t)) = pair
                             
@@ -189,20 +233,122 @@ Sub arrange_sheets()
                         End If
                     End If
                 Next j
+                
                 x = x + 10
                 pn = pn + 1
             Loop
+        End If
     Next i
     
     ' Create a sheet for teacher information
+    nameSheet ("Teachers")
     
+    '  Create labels for the worksheet
+    Cells(1, 1) = "Name"
+    Cells(1, 2) = "#"
+    Cells(1, 3) = "@"
+    Cells(1, 4) = "Yrs"
+    Cells(1, 5) = "Member"
+    Cells(1, 6) = "Fee"
+    Cells(1, 7) = "Students"
+    Cells(1, 8) = "Actual"
+    Cells(1, 9) = "Add. Fees"
+    Cells(1, 10) = "Reported"
+    Cells(1, 11) = "Act. Due"
+    Cells(1, 12) = "Address"
+    Cells(1, 13) = "Notes"
+    
+    '  For each non-dupe teacher on the list
+    y = 2
+    For i = 1 To (cur - 1)
+        If dupes(i) = False Then
+    '   Dump row information
+            Cells(y, 1) = teachers(i)
+            Cells(y, 2) = pNums(i)
+            Cells(y, 3) = emails(i)
+            Cells(y, 4) = tYears(i)
+            Cells(y, 5) = memStatus(i)
+            Cells(y, 6) = memFeeStat(i)
+            Cells(y, 7) = repStudents(i)
+            Cells(y, 8) = actStudents(i)
+            Cells(y, 9) = stuFees(i)
+            Cells(y, 10) = totFees(i)
+    '   Check fees due
+            x = actStudents(i)
+            Dim mo, day As Integer
+    '    Check early registration status for fee multiplier
+            mo = CInt(Right(Left(priority(i), 7), 2))
+            day = CInt(Right(Left(priority(i), 10), 2))
+            If (mo < monER) Or (mo = monER And day <= dayER) Then
+                x = x * sFee
+            Else
+                x = x * lFee
+            End If
+    '    Check membership status for additional dues
+            If (Left(memFeeStat(i), 1) = "T") Then
+                x = x + mFee
+            End If
+            Cells(y, 11) = x
+            Cells(y, 12) = addrs(i)
+            Cells(y, 13) = notes(i)
+            y = y + 1
+        End If
+    Next i
+    
+    Sheets("Teachers").UsedRange.Columns.AutoFit
     
     ' Create a sheet for student information
+    nameSheet ("Students")
     
+    '  Create labels for student sheet
+    Cells(1, 1) = "Name"
+    Cells(1, 2) = "Years"
+    Cells(1, 3) = "Senior"
+    
+    y = 2
+    For i = 1 To (rCt * 30)
+        If (students(i) <> "") Then
+            Cells(y, 1) = students(i)
+            Cells(y, 2) = stuYears(i)
+            Cells(y, 3) = stuStats(i)
+            y = y + 1
+        End If
+    Next i
+    
+    Sheets("Students").UsedRange.Columns.AutoFit
     
     ' Create a sheet for song assignment
-    
-    
+    For i = 0 To tCt - 1                    'For each concert time...
+        Dim newName As String
+        newName = "Program" + CStr(i + 1)
+        nameSheet (newName)
+        
+        For j = 1 To sCt                    'For each song...
+            y = 1 + (8 * (j - 1))
+            
+            Cells(y, 1) = songs(j)          'Place the title
+            'Cells(y, 3) = comps(j)          'Place the composer
+            
+            y = y + 1                       'Place all the pairs
+            py = (i * sCt) + j
+            pn = 1
+            x = 1
+            Do While (pAssigns(py, pn) <> "" And pn < pCt)
+                Cells(y, x) = pAssigns(py, pn)
+                If (x < 3) Then
+                    x = x + 1
+                Else
+                    y = y + 1
+                    x = 1
+                End If
+                pn = pn + 1
+                
+            Loop
+        Next j
+        
+        Sheets(newName).UsedRange.Columns.AutoFit
+        
+    Next i
     
 End Sub
 
