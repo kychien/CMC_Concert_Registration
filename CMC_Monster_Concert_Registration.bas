@@ -38,6 +38,7 @@ Sub arrange_sheets()
     Dim dupes() As Boolean
     Dim valid As Boolean
     Dim songs() As String
+    Dim sheetName, dateExt As String
     
     ' Determine row count for variable sizing
     Dim rCt As Long
@@ -57,6 +58,8 @@ Sub arrange_sheets()
     sFee = 60                                   ' Early registration fee
     lFee = 70                                   ' Late registration fee
     maxS = 30                                   ' Maximum number of students allowed in form
+    
+    dateExt = Format(Date, "yyyy-mm-dd")
     
     ReDim priority(rCt)
     ReDim priority(rCt)
@@ -241,7 +244,8 @@ Sub arrange_sheets()
     Next i
     
     ' Create a sheet for teacher information
-    nameSheet ("Teachers")
+    sheetName = "T " + dateExt
+    nameSheet (sheetName)
     
     '  Create labels for the worksheet
     Cells(1, 1) = "Name"
@@ -295,10 +299,11 @@ Sub arrange_sheets()
         End If
     Next i
     
-    Sheets("Teachers").UsedRange.Columns.AutoFit
+    Sheets(sheetName).UsedRange.Columns.AutoFit
     
     ' Create a sheet for student information
-    nameSheet ("Students")
+    sheetName = "S " + dateExt
+    nameSheet (sheetName)
     
     '  Create labels for student sheet
     Cells(1, 1) = "Name"
@@ -315,12 +320,12 @@ Sub arrange_sheets()
         End If
     Next i
     
-    Sheets("Students").UsedRange.Columns.AutoFit
+    Sheets(sheetName).UsedRange.Columns.AutoFit
     
     ' Create a sheet for song assignment
     For i = 0 To tCt - 1                    'For each concert time...
         Dim newName As String
-        newName = "Program" + CStr(i + 1)
+        newName = "P" + CStr(i + 1) + " " + dateExt
         nameSheet (newName)
         
         For j = 1 To sCt                    'For each song...
