@@ -219,7 +219,7 @@ Sub arrange_sheets()
                     End If
                     If (valid) Then
     '    Identify appropriate queue based on time!!!
-                        If (Left(Cells(i, px + 2), 1) = "4") Then
+                        If (Left(Cells(i, px + 2).Text, 1) = "4") Then
                             t = pn + sCt
                         Else
                             t = pn
@@ -604,7 +604,7 @@ Sub arrange_checker()
                     End If
                     If (valid) Then
     '    Identify appropriate queue based on time!!!
-                        If (Left(Cells(i, px + 2), 1) = "4") Then
+                        If (Left(Cells(i, px + 2).Text, 1) = "4") Then
                             t = pn + sCt
                         Else
                             t = pn
